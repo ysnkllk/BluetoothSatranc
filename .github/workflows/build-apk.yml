@@ -266,4 +266,29 @@ jobs:
           api-level: 35
           target: google_apis
           arch: x86_64
-          pro
+          profile: pixel_6
+          disable-animations: true
+          script: |
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            adb logcat -c
+            adb shell am start -W -n com.ornek.bluetoothsatranc/.MainActivity
+            sleep 6
+            if ! adb shell pidof com.ornek.bluetoothsatranc; then
+              echo 'APP FAILED TO STAY OPEN. AndroidRuntime crash log:'
+              adb logcat -d -v time -s AndroidRuntime:E | tail -n 150
+              exit 1
+            fi
+            adb shell uiautomator dump /sdcard/window.xml
+            if ! adb shell cat /sdcard/window.xml | grep -Fq 'Yerel dene'; then
+              echo 'APP DID NOT SHOW THE EXPECTED MAIN SCREEN. Current UI:'
+              adb shell cat /sdcard/window.xml | head -c 9000
+              echo
+              adb logcat -d -v time -s AndroidRuntime:E | tail -n 150
+              exit 1
+            fi
+            echo 'SUCCESS: app main screen is visible after 6 seconds'
+      - name: Publish tested v0.2.1 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BluetoothSatranc-v0.2.1-APK
+          path: app/build/outputs/apk/debug/*.apk
