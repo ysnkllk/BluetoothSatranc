@@ -235,6 +235,7 @@ jobs:
           AAA=
           PROJECT_DATA
           unzip -oq /tmp/bluetooth-chess.zip -d "$GITHUB_WORKSPACE"
+                    sed -i 's/board\.toUci(move)/move.toString()/g' "$GITHUB_WORKSPACE/app/src/main/java/com/ornek/bluetoothsatranc/ChessGame.java"
           test -f "$GITHUB_WORKSPACE/app/build.gradle"
       - name: Set up Java 17
         uses: actions/setup-java@v4
